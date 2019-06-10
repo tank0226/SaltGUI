@@ -1,0 +1,12 @@
+Branch zzz-lookfeel
+("zzz" to move it to the bottom of the list)
+PoC to realize a uniform page navigation system
+
+PRO:
+* code cleanup
+
+CON:
+* it does not work perfect yet
+
+VERDICT:
+Keep until it is useable

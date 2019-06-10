@@ -173,7 +173,9 @@ h1 {
 .route {
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.5s; /* Can be used to add transitions between views */
+
+  /* 0.5s matches the code in Router.hideRoute */
+  transition: opacity 0.5s;
   position: absolute;
   width: 100%;
 }

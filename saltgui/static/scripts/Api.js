@@ -259,11 +259,11 @@ export class API {
           const loginResponseStr = Utils.getStorageItem("session", "login-response");
           if (!loginResponseStr) {
             this.logout().then(() => {
-              window.location.replace(config.NAV_URL + "/login?reason=no-session");
-              return true;
+              this.showPage(this.loginRoute, {"reason": "no-session"});
+	      return true;
             }, () => {
-              window.location.replace(config.NAV_URL + "/login?reason=no-session");
-              return false;
+              this.showPage(this.loginRoute, {"reason": "no-session"});
+	      return false;
             });
           }
 
@@ -274,10 +274,10 @@ export class API {
             const expireValue = loginResponse.expire;
             if (now > expireValue) {
               this.logout().then(() => {
-                window.location.replace(config.NAV_URL + "/login?reason=expired-session");
+                this.showPage(this.loginRoute, {"reason": "expired-session"});
                 return true;
               }, () => {
-                window.location.replace(config.NAV_URL + "/login?reason=expired-session");
+                this.showPage(this.loginRoute, {"reason": "expired-session"});
                 return false;
               });
             }

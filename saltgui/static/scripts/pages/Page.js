@@ -114,4 +114,14 @@ export class Page {
     const dashboard = this.pageElement.querySelector(".dashboard");
     dashboard.append(pPanel.div);
   }
+
+  cleanTableAndStatus (pageName) {
+    const page = this.getPageElement().querySelector("." + pageName);
+    const tbody = page.querySelector("table tbody");
+    // remove all rows
+    tbody.innerHTML = "";
+    const msg = page.querySelector(".msg");
+    // remove previous summry
+    msg.innerText = "(loading)";
+  }
 }

@@ -28,22 +28,22 @@ export class Router {
     this.currentPage = undefined;
     this.pages = [];
 
-    this._registerPage(new LoginPage(this));
-    this._registerPage(new MinionsPage(this));
+    this._registerPage(this.loginPage = new LoginPage(this));
+    this._registerPage(this.minionsPage = new MinionsPage(this));
     this._registerPage(this.keysPage = new KeysPage(this));
-    this._registerPage(new GrainsPage(this));
-    this._registerPage(new GrainsMinionPage(this));
-    this._registerPage(new SchedulesPage(this));
-    this._registerPage(new SchedulesMinionPage(this));
-    this._registerPage(new PillarsPage(this));
-    this._registerPage(new PillarsMinionPage(this));
-    this._registerPage(new BeaconsPage(this));
+    this._registerPage(this.grainsPage = new GrainsPage(this));
+    this._registerPage(this.grainsMinionPage = new GrainsMinionPage(this));
+    this._registerPage(this.schedulesPage = new SchedulesPage(this));
+    this._registerPage(this.schedulesMinionPage = new SchedulesMinionPage(this));
+    this._registerPage(this.pillarsPage = new PillarsPage(this));
+    this._registerPage(this.pillarsMinionPage = new PillarsMinionPage(this));
+    this._registerPage(this.beaconsPage = new BeaconsPage(this));
     this._registerPage(this.beaconsMinionPage = new BeaconsMinionPage(this));
     this._registerPage(this.jobPage = new JobPage(this));
-    this._registerPage(new JobsPage(this));
-    this._registerPage(new TemplatesPage(this));
+    this._registerPage(this.jobsPage = new JobsPage(this));
+    this._registerPage(this.templatesPage = new TemplatesPage(this));
     this._registerPage(this.eventsPage = new EventsPage(this));
-    this._registerPage(new OptionsPage(this));
+    this._registerPage(this.optionsPage = new OptionsPage(this));
 
     // show template menu item if templates defined
     const templatesText = Utils.getStorageItem("session", "templates", "");
@@ -58,113 +58,111 @@ export class Router {
 
     Router.updateMainMenu();
 
-    // This URL already has its prefix added
-    // therefore is must not be added again
-    this.goTo(window.location.pathname + window.location.search, true);
+    this.showPage(this.loginPage);
   }
 
   _registerRouterEventListeners () {
     document.getElementById("logo").
       addEventListener("click", () => {
         if (window.event.ctrlKey) {
-          window.location.assign(config.NAV_URL + "/options");
+          this.showPage(this.optionsRoute);
         } else {
-          window.location.assign(config.NAV_URL + "/");
+          this.showPage(this.minionsRoute);
         }
       });
 
     document.getElementById("button-minions1").
       addEventListener("click", () => {
-        window.location.replace(config.NAV_URL + "/");
+        this.showPage(this.minionsRoute);
       });
     document.getElementById("button-minions2").
       addEventListener("click", () => {
-        window.location.replace(config.NAV_URL + "/");
+        this.showPage(this.minionsRoute);
       });
 
     document.getElementById("button-grains1").
       addEventListener("click", () => {
-        window.location.replace(config.NAV_URL + "/grains");
+        this.showPage(this.grainsRoute);
       });
     document.getElementById("button-grains2").
       addEventListener("click", () => {
-        window.location.replace(config.NAV_URL + "/grains");
+        this.showPage(this.grainsRoute);
       });
 
     document.getElementById("button-schedules1").
       addEventListener("click", () => {
-        window.location.replace(config.NAV_URL + "/schedules");
+        this.showPage(this.schedulesRoute);
       });
     document.getElementById("button-schedules2").
       addEventListener("click", () => {
-        window.location.replace(config.NAV_URL + "/schedules");
+        this.showPage(this.schedulesRoute);
       });
 
     document.getElementById("button-pillars1").
       addEventListener("click", () => {
-        window.location.replace(config.NAV_URL + "/pillars");
+        this.showPage(this.pillarsRoute);
       });
     document.getElementById("button-pillars2").
       addEventListener("click", () => {
-        window.location.replace(config.NAV_URL + "/pillars");
+        this.showPage(this.pillarsRoute);
       });
 
     document.getElementById("button-beacons1").
       addEventListener("click", () => {
-        window.location.replace(config.NAV_URL + "/beacons");
+        this.showPage(this.beaconsRoute);
       });
     document.getElementById("button-beacons2").
       addEventListener("click", () => {
-        window.location.replace(config.NAV_URL + "/beacons");
+        this.showPage(this.beaconsRoute);
       });
 
     document.getElementById("button-keys1").
       addEventListener("click", () => {
-        window.location.replace(config.NAV_URL + "/keys");
+        this.showPage(this.keysRoute);
       });
     document.getElementById("button-keys2").
       addEventListener("click", () => {
-        window.location.replace(config.NAV_URL + "/keys");
+        this.showPage(this.keysRoute);
       });
 
     document.getElementById("button-jobs1").
       addEventListener("click", () => {
-        window.location.replace(config.NAV_URL + "/jobs");
+        this.showPage(this.jobsRoute);
       });
     document.getElementById("button-jobs2").
       addEventListener("click", () => {
-        window.location.replace(config.NAV_URL + "/jobs");
+        this.showPage(this.jobsRoute);
       });
 
     document.getElementById("button-templates1").
       addEventListener("click", () => {
-        window.location.replace(config.NAV_URL + "/templates");
+        this.showPage(this.templatesRoute);
       });
     document.getElementById("button-templates2").
       addEventListener("click", () => {
-        window.location.replace(config.NAV_URL + "/templates");
+        this.showPage(this.templatesRoute);
       });
 
     document.getElementById("button-events1").
       addEventListener("click", () => {
-        window.location.replace(config.NAV_URL + "/eventsview");
+        this.showPage(this.eventsRoute);
       });
     document.getElementById("button-events2").
       addEventListener("click", () => {
-        window.location.replace(config.NAV_URL + "/eventsview");
+        this.showPage(this.eventsRoute);
       });
 
     document.getElementById("button-logout1").
       addEventListener("click", () => {
         this.api.logout().then(() => {
-          window.location.replace(config.NAV_URL + "/login?reason=logout");
+          this.showPage(this.loginRoute, {"reason": "logout"});
           return true;
         });
       });
     document.getElementById("button-logout2").
       addEventListener("click", () => {
         this.api.logout().then(() => {
-          window.location.replace(config.NAV_URL + "/login?reason=logout");
+          this.showPage(this.loginRoute, {"reason": "logout"});
           return false;
         });
       });
@@ -200,10 +198,10 @@ export class Router {
       warning.innerText = "Logout";
       // logout, and redirect to login screen
       this.api.logout().then(() => {
-        window.location.replace(config.NAV_URL + "/login?reason=expired-session");
+        this.showPage(this.loginRoute, {"reason": "expired-session"});
         return true;
       }, () => {
-        window.location.replace(config.NAV_URL + "/login?reason=expired-session");
+        this.showPage(this.loginRoute, {"reason": "expired-session"});
         return false;
       });
       return;
@@ -240,7 +238,7 @@ export class Router {
     // Api.apiRequest will do all the work
     wheelConfigValuesPromise.then(() => true, () => {
       this.api.logout().then(() => {
-        window.location.replace(config.NAV_URL + "/login?reason=no-session");
+        this.showPage(this.loginRoute, {"reason": "no-session"});
         return false;
       });
     });
@@ -285,7 +283,7 @@ export class Router {
       if (pathUrl === config.NAV_URL + "/login" || pathUrl === config.NAV_URL + "/") {
         window.history.pushState({}, undefined, pPath);
       }
-      this._showPage(route);
+      this.showPage(route, { });
       return;
     }
     // route could not be found
@@ -293,8 +291,15 @@ export class Router {
     this.goTo("/");
   }
 
-  _showPage (pPage) {
+  showPage (pPage, pParameters) {
+    for (const key in pParameters) {
+      window.sessionStorage.setItem(key, pParameters[key]);
+    }
+
     pPage.pageElement.style.display = "";
+
+    const minionMenuItem = document.getElementById("button-minions1");
+    const jobsMenuItem = document.getElementById("button-jobs1");
 
     const activeMenuItems = Array.from(document.querySelectorAll(".menu-item-active"));
     activeMenuItems.forEach((menuItem) => {
@@ -332,13 +337,15 @@ export class Router {
     // it is either not started, or needs restarting
     API.getEvents(this);
 
-    if (this.currentPage) {
-      Router._hidePage(this.currentPage);
+    if (this.currentPage && pPage !== this.currentPage) {
+      this._hideRoute(this.currentPage);
     }
 
     this.currentPage = pPage;
     this.currentPage.pageElement.classList.add("current");
     this.switchingPage = false;
+
+    document.title = "SaltGUI - " + this.currentPage.name;
   }
 
   static _hidePage (pPage) {
