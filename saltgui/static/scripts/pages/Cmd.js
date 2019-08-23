@@ -1,34 +1,29 @@
 /* global document window */
 
-import {Documentation} from "./Documentation.js";
-import {DropDownMenu} from "./DropDown.js";
-import {Output} from "./output/Output.js";
-import {ParseCommandLine} from "./ParseCommandLine.js";
-import {RunType} from "./RunType.js";
-import {TargetType} from "./TargetType.js";
-import {Utils} from "./Utils.js";
+import {Documentation} from "../Documentation.js";
+import {DropDownMenu} from "../DropDown.js";
+import {Output} from "../output/Output.js";
+import {Page} from "./Page.js";
+import {ParseCommandLine} from "../ParseCommandLine.js";
+import {RunType} from "../RunType.js";
+import {TargetType} from "../TargetType.js";
+import {Utils} from "../Utils.js";
 
-export class CommandBox {
+export class CmdPage extends Page {
 
-  constructor (pRouter, pApi) {
-    this.router = pRouter;
-    this.api = pApi;
-
-    const cmdbox = document.getElementById("cmd-box");
-    this.cmdmenu = new DropDownMenu(cmdbox);
-
-    this.documentation = new Documentation(this.router, this);
-    this._registerCommandBoxEventListeners();
+  constructor (pRouter) {
+    super("cmd", "Cmd", "page-cmd", "", pRouter);
 
     RunType.createMenu();
     TargetType.createMenu();
 
-    const manualRun = document.getElementById("popup-run-command");
-    Utils.addTableHelp(manualRun, "Click for help");
-    const helpButton = manualRun.querySelector("#help");
+    Utils.addTableHelp(this.getPageElement(), "Click for help");
+    const helpButton = this.getPageElement().querySelector("#help");
     helpButton.addEventListener("click", () => {
       CommandBox._showHelp();
     });
+
+    this._registerCommandBoxEventListeners();
   }
 
   static _populateTemplateMenu () {
@@ -115,29 +110,69 @@ export class CommandBox {
   }
 
   _registerCommandBoxEventListeners () {
-    document.getElementById("popup-run-command").
-      addEventListener("click", (pClickEvent) => CommandBox._hideManualRun(pClickEvent));
-    document.getElementById("button-manual-run").
-      addEventListener("click", (pClickEvent) => CommandBox.showManualRun(pClickEvent, this.api));
-    document.getElementById("cmd-close-button").
-      addEventListener("click", (pClickEvent) => CommandBox._hideManualRun(pClickEvent));
+    const targetField = this.pageElement.querySelector("#target");
+    TargetType.autoSelectTargetType(targetField.value);
+    this._addKeyEventListener("#target", () => {
+      const targetType = targetField.value;
+      TargetType.autoSelectTargetType(targetType);
+    });
+
+    const commandField = this.pageElement.querySelector("#command");
+
+    const cmdbox = this.pageElement.querySelector("#cmd-box");
+    this.cmdmenu = new DropDownMenu(cmdbox);
+    this._addKeyEventListener("#command", this.cmdmenu.verifyAll);
+    this.documentation = new Documentation(this);
 
     document.querySelector(".run-command input[type='submit']").
       addEventListener("click", () => {
         this._onRun();
       });
 
-    document.getElementById("target").
-      addEventListener("input", () => {
-        const targetField = document.getElementById("target");
-        const targetType = targetField.value;
-        TargetType.autoSelectTargetType(targetType);
-      });
+    RunType.setRunTypeDefault();
 
-    document.getElementById("command").
-      addEventListener("input", () => {
-        this.cmdmenu.verifyAll();
-      });
+    const outputField = this.pageElement.querySelector("pre");
+    outputField.innerText = "Waiting for command...";
+
+    // (re-)populate the dropdown box
+    const targetList = document.getElementById("data-list-target");
+    while (targetList.firstChild) {
+      targetList.removeChild(targetList.firstChild);
+    }
+    const nodeGroups = JSON.parse(window.localStorage.getItem("nodegroups"));
+    if (nodeGroups) {
+      for (const nodeGroup of Object.keys(nodeGroups).sort()) {
+        const option = document.createElement("option");
+        option.value = "#" + nodeGroup;
+        targetList.appendChild(option);
+      }
+    }
+    const minions = JSON.parse(window.localStorage.getItem("minions"));
+    if (minions) {
+      for (const minionId of minions.sort()) {
+        const option = document.createElement("option");
+        option.value = minionId;
+        targetList.appendChild(option);
+      }
+    }
+
+    // give another field (which does not have a list) focus first
+    // because when a field gets focus 2 times in a row,
+    // the dropdown box opens, and we don't want that...
+    commandField.focus();
+    targetField.focus();
+  }
+
+  _addKeyEventListener (selector, func) {
+    // keydown is too early, keypress also does not work
+    const field = this.pageElement.querySelector(selector);
+    field.addEventListener("keyup", func);
+    // cut/paste do not work everywhere
+    field.addEventListener("cut", func);
+    field.addEventListener("paste", func);
+    // blur/focus should not be needed but are a valuable fallback
+    field.addEventListener("blur", func);
+    field.addEventListener("focus", func);
   }
 
   static _applyTemplate (template) {
@@ -151,10 +186,10 @@ export class CommandBox {
         // we don't support that, revert to standard (not default)
         targetType = "glob";
       }
-      TargetType.setTargetType(targetType);
+      this.targetType.setTargetType(targetType);
     } else {
       // not in the template, revert to default
-      TargetType.setTargetTypeDefault();
+      this.targetType.setTargetTypeDefault();
     }
 
     if (template.target) {
@@ -169,12 +204,27 @@ export class CommandBox {
     }
   }
 
+  _onRunReturn (pResponse, pCommand) {
+    const outputContainer = this.pageElement.querySelector("pre");
+    let minions = Object.keys(pResponse);
+    if (pCommand.startsWith("runners.")) {
+      minions = ["RUNNER"];
+    }
+    if (pCommand.startsWith("wheel.")) {
+      minions = ["WHEEL"];
+    }
+    // do not suppress the jobId (even when we can)
+    Output.addResponseOutput(outputContainer, null, minions, pResponse, pCommand, "done");
+    const button = this.pageElement.querySelector("input[type='submit']");
+    button.disabled = false;
+  }
+
   _onRun () {
-    const button = document.querySelector(".run-command input[type='submit']");
+    const button = document.getElementById("run-command");
     if (button.disabled) {
       return;
     }
-    const output = document.querySelector(".run-command pre");
+    const output = this.pageElement.querySelector("pre");
 
     const targetField = document.getElementById("target");
     const targetValue = targetField.value;
@@ -216,7 +266,7 @@ export class CommandBox {
   }
 
   static onRunReturn (pResponse, pCommand) {
-    const outputContainer = document.querySelector(".run-command pre");
+    const outputContainer = this.getPageElement().querySelector("pre");
     let minions = Object.keys(pResponse);
     if (pCommand.startsWith("runners.")) {
       minions = ["RUNNER"];
@@ -227,7 +277,7 @@ export class CommandBox {
     Output.addResponseOutput(outputContainer, null, minions, pResponse, pCommand, "done");
     const targetField = document.getElementById("target");
     const commandField = document.getElementById("command");
-    const button = document.querySelector(".run-command input[type='submit']");
+    const button = document.getElementById("run-command");
     targetField.disabled = false;
     commandField.disabled = false;
     button.disabled = false;
@@ -453,7 +503,7 @@ export class CommandBox {
       // { "jid": "20180718173942195461", "minions": [ ... ] }
     }
 
-    return this.api.apiRequest("POST", "/", params);
+    return this.router.api.apiRequest("POST", "/", params);
   }
 
   static handleSaltJobRetEvent (pTag, pData) {

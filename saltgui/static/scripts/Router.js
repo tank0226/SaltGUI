@@ -169,6 +169,11 @@ export class Router {
         });
       });
 
+    document.querySelector("#button-cmd").
+      addEventListener("click", () => {
+        window.location.replace("/cmd");
+      });
+
     // don't verify for invalid sessions too often
     // this happens only when the server was reset
     window.setInterval(() => {
