@@ -11,6 +11,8 @@ import {JobPage} from "./pages/Job.js";
 import {JobsPage} from "./pages/Jobs.js";
 import {KeysPage} from "./pages/Keys.js";
 import {LoginPage} from "./pages/Login.js";
+import {MineMinionPage} from "./pages/MineMinion.js";
+import {MinePage} from "./pages/Mine.js";
 import {MinionsPage} from "./pages/Minions.js";
 import {OptionsPage} from "./pages/Options.js";
 import {PillarsMinionPage} from "./pages/PillarsMinion.js";
@@ -33,6 +35,8 @@ export class Router {
     this._registerPage(this.keysPage = new KeysPage(this));
     this._registerPage(new GrainsPage(this));
     this._registerPage(new GrainsMinionPage(this));
+    this._registerPage(new MinePage(this));
+    this._registerPage(new MineMinionPage(this));
     this._registerPage(new SchedulesPage(this));
     this._registerPage(new SchedulesMinionPage(this));
     this._registerPage(new PillarsPage(this));
@@ -116,6 +120,15 @@ export class Router {
     document.getElementById("button-beacons2").
       addEventListener("click", () => {
         window.location.replace(config.NAV_URL + "/beacons");
+      });
+
+    document.getElementById("button-mine1").
+      addEventListener("click", () => {
+        window.location.replace(config.NAV_URL + "/mine");
+      });
+    document.getElementById("button-mine2").
+      addEventListener("click", () => {
+        window.location.replace(config.NAV_URL + "/mine");
       });
 
     document.getElementById("button-keys1").
@@ -308,7 +321,8 @@ export class Router {
       if (elem1.id === "button-pillars1" ||
          elem1.id === "button-schedules1" ||
          elem1.id === "button-grains1" ||
-         elem1.id === "button-beacons1") {
+         elem1.id === "button-beacons1" ||
+         elem1.id === "button-mine1") {
         const minionMenuItem = document.getElementById("button-minions1");
         minionMenuItem.classList.add("menu-item-active");
       }
