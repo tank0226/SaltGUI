@@ -13,6 +13,7 @@ import {KeysPage} from "./pages/Keys.js";
 import {LoginPage} from "./pages/Login.js";
 import {MinionsPage} from "./pages/Minions.js";
 import {OptionsPage} from "./pages/Options.js";
+import {OrchestrationsPage} from "./pages/Orchestrations.js";
 import {PillarsMinionPage} from "./pages/PillarsMinion.js";
 import {PillarsPage} from "./pages/Pillars.js";
 import {SchedulesMinionPage} from "./pages/SchedulesMinion.js";
@@ -43,15 +44,25 @@ export class Router {
     this._registerPage(new JobsPage(this));
     this._registerPage(new TemplatesPage(this));
     this._registerPage(this.eventsPage = new EventsPage(this));
+    this._registerPage(new OrchestrationsPage(this));
     this._registerPage(new OptionsPage(this));
 
     // show template menu item if templates defined
     const templatesText = Utils.getStorageItem("session", "templates", "");
     if (templatesText) {
-      const item1 = document.getElementById("button-templates1");
-      item1.classList.remove("menu-item-hidden");
-      const item2 = document.getElementById("button-templates2");
-      item2.classList.remove("menu-item-hidden");
+      const templates1 = document.getElementById("button-templates1");
+      templates1.classList.remove("menu-item-hidden");
+      const templates2 = document.getElementById("button-templates2");
+      templates2.classList.remove("menu-item-hidden");
+    }
+
+    // show orchestrations menu item if orchestrations defined
+    const orchestrationsText = Utils.getStorageItem("session", "orchestrations", "");
+    if (orchestrationsText) {
+      const orchestrationsItem1 = document.getElementById("button-orchestrations1");
+      orchestrationsItem1.classList.remove("menu-item-hidden");
+      const orchestrationsItem2 = document.getElementById("button-orchestrations2");
+      orchestrationsItem2.classList.remove("menu-item-hidden");
     }
 
     this._registerRouterEventListeners();
@@ -143,6 +154,15 @@ export class Router {
     document.getElementById("button-templates2").
       addEventListener("click", () => {
         window.location.replace(config.NAV_URL + "/templates");
+      });
+
+    document.getElementById("button-orchestrations1").
+      addEventListener("click", () => {
+        window.location.replace(config.NAV_URL + "/orchestrations");
+      });
+    document.getElementById("button-orchestrations2").
+      addEventListener("click", () => {
+        window.location.replace(config.NAV_URL + "/orchestrations");
       });
 
     document.getElementById("button-events1").
@@ -313,7 +333,8 @@ export class Router {
         minionMenuItem.classList.add("menu-item-active");
       }
       if (elem1.id === "button-jobs1" ||
-         elem1.id === "button-templates1") {
+         elem1.id === "button-templates1" ||
+         elem1.id === "button-orchestrations1") {
         const jobsMenuItem = document.getElementById("button-jobs1");
         jobsMenuItem.classList.add("menu-item-active");
       }

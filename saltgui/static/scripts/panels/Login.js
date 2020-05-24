@@ -239,6 +239,27 @@ export class LoginPanel extends Panel {
 
     const toolTipMode = wheelConfigValuesData.saltgui_tooltip_mode;
     Utils.setStorageItem("session", "tooltip_mode", toolTipMode);
+
+    // Now that we have the basic configuration
+    // Update the GUI accordingly for a few cases
+
+    this._EnableGuiOptions();
+  }
+
+  _EnableGuiOptions () {
+    // show template menu item if templates defined
+    const templatesText = Utils.getStorageItem("session", "templates", "");
+    if (templatesText && templatesText.length) {
+      const templates1 = document.getElementById("button-templates1");
+      templates1.classList.remove("menu-item-hidden");
+      const templates2 = document.getElementById("button-templates2");
+      templates2.classList.remove("menu-item-hidden");
+    }
+
+    const orchestrations1 = document.getElementById("button-orchestrations1");
+    orchestrations1.classList.remove("menu-item-hidden");
+    const orchestrations2 = document.getElementById("button-orchestrations2");
+    orchestrations2.classList.remove("menu-item-hidden");
   }
 
   _onLoginFailure (error) {
