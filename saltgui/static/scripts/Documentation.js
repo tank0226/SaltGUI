@@ -112,7 +112,8 @@ export class Documentation {
       dummyCommand = "sys.doc " + cmd;
     }
 
-    const targetType = TargetType.menuTargetType._value;
+console.log("using TargetType.menuTargetType");
+    const targetType = TargetType.menuTargetType.getValue();
 
     const func = this.commandbox.getRunParams(targetType, target, docCommand, true);
     if (func === null) {

@@ -17,6 +17,8 @@ import {Utils} from "./Utils.js";
 // the menu. when at least one item is visible, the menu is visible
 // remember to call verifyApp() when that is potentially the case
 
+// superclass for DropDownMenuRadio, DropDownMenuCheckbox and DropDownMenuCmd
+
 export class DropDownMenu {
 
   // Creates an empty dropdown menu
@@ -74,6 +76,7 @@ export class DropDownMenu {
         visibleCount += 1;
       }
     }
+
     // hide the menu when it has no visible menu-items
     const displayVisible = this.menuDropdown.tagName === "TD" ? "table-cell" : "inline-block";
     const displayInvisible = "none";
@@ -95,7 +98,7 @@ export class DropDownMenu {
   // function is called each time the menu opens
   // This allows dynamic menuitem titles (use menuitem.innerText/innerHTML)
   // or visibility (use menuitem.style.display = "none"/"inline-block")
-  addMenuItem (pTitle, pCallBack, pValue) {
+  addMenuItem (pTitle, pCallBack = null, pVerifyCallback = null) {
     const button = Utils.createDiv("run-command-button", "...");
     if (pValue) {
       button._value = pValue;
@@ -106,16 +109,16 @@ export class DropDownMenu {
       button.verifyCallBack = pTitle;
     }
     button.addEventListener("click", (pClickEvent) => {
-      this._callback(pClickEvent, pCallBack, pValue);
+      this._callback(pClickEvent, pCallBack);
     });
     this.menuDropdownContent.appendChild(button);
     this.verifyAll();
     return button;
   }
 
-  _callback (pClickEvent, pCallBack, pValue) {
-    this._value = pValue;
+  _callback (pClickEvent, pCallBack) {
     pCallBack(pClickEvent);
+    this.verifyAll();
     pClickEvent.stopPropagation();
   }
 
@@ -134,5 +137,4 @@ export class DropDownMenu {
   __hideMenu () {
     this.menuDropdown.style.display = "none";
   }
-
 }

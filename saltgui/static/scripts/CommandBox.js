@@ -1,7 +1,7 @@
 /* global document window */
 
 import {Documentation} from "./Documentation.js";
-import {DropDownMenu} from "./DropDown.js";
+import {DropDownMenuCmd} from "./DropDownCmd.js";
 import {Output} from "./output/Output.js";
 import {ParseCommandLine} from "./ParseCommandLine.js";
 import {RunType} from "./RunType.js";
@@ -15,13 +15,14 @@ export class CommandBox {
     this.api = pApi;
 
     const cmdbox = document.getElementById("cmd-box");
-    this.cmdmenu = new DropDownMenu(cmdbox);
+    this.cmdmenu = new DropDownMenuCmd(cmdbox);
 
-    this.documentation = new Documentation(this.router, this);
     this._registerCommandBoxEventListeners();
 
     RunType.createMenu();
     TargetType.createMenu();
+
+    this.documentation = new Documentation(pRouter, this);
 
     const manualRun = document.getElementById("popup-run-command");
     Utils.addTableHelp(manualRun, "Click for help");
@@ -38,7 +39,7 @@ export class CommandBox {
       // since the storage-item is then not populated yet.
       return;
     }
-    const menu = new DropDownMenu(titleElement);
+    const menu = new DropDownMenuCmd(titleElement);
     const templatesText = Utils.getStorageItem("session", "templates", "{}");
     const templates = JSON.parse(templatesText);
     const keys = Object.keys(templates).sort();
@@ -48,7 +49,7 @@ export class CommandBox {
       if (!description) {
         description = "(" + key + ")";
       }
-      menu.addMenuItem(
+      menu.addMenuItemCmd(
         description,
         () => {
           CommandBox._applyTemplate(template);
@@ -154,7 +155,7 @@ export class CommandBox {
       TargetType.setTargetType(targetType);
     } else {
       // not in the template, revert to default
-      TargetType.setTargetTypeDefault();
+      TargetType.setTargetType(null);
     }
 
     if (template.target) {
@@ -181,7 +182,7 @@ export class CommandBox {
     const commandField = document.getElementById("command");
     const commandValue = commandField.value;
 
-    const targetType = TargetType.menuTargetType._value;
+    const targetType = TargetType.menuTargetType.getValue();
 
     const patWhitespaceAll = /\s/g;
     const commandValueNoTabs = commandValue.replace(patWhitespaceAll, " ");
@@ -309,7 +310,7 @@ export class CommandBox {
 
     // reset to default, so that its value is initially hidden
     RunType.setRunTypeDefault();
-    TargetType.setTargetTypeDefault();
+    TargetType.setTargetType(null);
 
     // test whether the command may have caused an update to the list
     // the user may have altered the text after running the command, just ignore that
