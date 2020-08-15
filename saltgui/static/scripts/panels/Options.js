@@ -43,7 +43,7 @@ export class OptionsPanel extends Panel {
       [
         ["doc", "doc", "none:no doc"],
         ["highstate", "saltgui:SaltGUI highstate", "normal:Normal highstate", "none:No highstate"],
-        ["output", "json", "nested", "yaml"]
+        ["output", "json", "nested", "yaml", "toml"]
       ]);
     this._addOptionRow(
       "datetime-fraction-digits-name", "saltgui_datetime_fraction_digits", "datetime-fraction-digits-value",
@@ -204,6 +204,9 @@ export class OptionsPanel extends Panel {
     const of7 = this.div.querySelector("#option-output-formats-value-output-yaml");
     of7.addEventListener("change", (evt) => { this._newOutputFormats(evt); });
     of7.checked = outputFormatsValue && outputFormatsValue.includes("yaml");
+    const of8 = document.getElementById("output-formats-output-toml");
+    of8.addEventListener("change", this._newOutputFormats);
+    of8.checked = outputFormatsValue && outputFormatsValue.includes("toml");
     /* eslint-enable brace-style,max-statements-per-line */
 
     /* eslint-disable brace-style,curly,max-statements-per-line */
@@ -302,6 +305,8 @@ export class OptionsPanel extends Panel {
     if (of6.checked) value += ",nested";
     const of7 = this.div.querySelector("#option-output-formats-value-output-yaml");
     if (of7.checked) value += ",yaml";
+    const of8 = document.getElementById("output-formats-output-toml");
+    if (of8.checked) value += ",toml";
     /* eslint-enable curly */
     value = JSON.stringify(value.substring(1));
     const outputFormatsTd = this.div.querySelector("#option-output-formats-value");
