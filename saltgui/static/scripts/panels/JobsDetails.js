@@ -141,9 +141,9 @@ export class JobsDetailsPanel extends JobsPanel {
         workLeft = true;
         continue;
       }
-      const jobId = tr.querySelector("td").innerText;
       detailsField.classList.add("no-job-details");
       detailsField.innerText = "loading...";
+      const jobId = tr.dataset.jobid;
       this._getJobDetails(jobId);
       // only update one item at a time
       return;
@@ -170,7 +170,14 @@ export class JobsDetailsPanel extends JobsPanel {
 
   _handleJobsRunnerJobsListJob (pJobId, pData) {
 
-    const detailsSpan = this.table.querySelector("#" + Utils.getIdFromJobId(pJobId) + " td.details span");
+    const jobTr = this.table.querySelector("#" + Utils.getIdFromJobId(pJobId));
+    if (!jobTr) {
+      return;
+    }
+    // don't process this one again
+    delete jobTr.dataset.detailsUnknown;
+
+    const detailsSpan = jobTr.querySelector("td.details span");
     if (!detailsSpan) {
       return;
     }
@@ -197,19 +204,19 @@ export class JobsDetailsPanel extends JobsPanel {
       pData.Minions = [];
     }
 
-    let detailsTxt = Utils.txtZeroOneMany(pData.Minions.length,
+    let detailsHTML = Utils.txtZeroOneMany(pData.Minions.length,
       "no minions", "{0} minion", "{0} minions");
 
     const keyCount = Object.keys(pData.Result).length;
-    detailsTxt += ", ";
+    detailsHTML += ", ";
     if (keyCount === pData.Minions.length) {
-      detailsTxt += "<span style='color: green'>";
+      detailsHTML += "<span style='color: green'>";
     } else {
-      detailsTxt += "<span style='color: red'>";
+      detailsHTML += "<span style='color: red'>";
     }
-    detailsTxt += Utils.txtZeroOneMany(keyCount,
+    detailsHTML += Utils.txtZeroOneMany(keyCount,
       "no results", "{0} result", "{0} results");
-    detailsTxt += "</span>";
+    detailsHTML += "</span>";
 
     const summary = {};
     for (const minionId in pData.Result) {
@@ -224,29 +231,29 @@ export class JobsDetailsPanel extends JobsPanel {
 
     const keys = Object.keys(summary).sort();
     for (const key of keys) {
-      detailsTxt += ", ";
+      detailsHTML += ", ";
       if (key === "0-0") {
-        detailsTxt += "<span style='color: green'>";
-        detailsTxt += Utils.txtZeroOneMany(summary[key], "", "{0} success", "{0} successes");
+        detailsHTML += "<span style='color: green'>";
+        detailsHTML += Utils.txtZeroOneMany(summary[key], "", "{0} success", "{0} successes");
       } else if (key.startsWith("0-")) {
-        detailsTxt += "<span style='color: orange'>";
-        detailsTxt += Utils.txtZeroOneMany(summary[key], "", "{0} success", "{0} successes");
+        detailsHTML += "<span style='color: orange'>";
+        detailsHTML += Utils.txtZeroOneMany(summary[key], "", "{0} success", "{0} successes");
       } else {
         // if (key.startsWith("1-"))
-        detailsTxt += "<span style='color: red'>";
-        detailsTxt += Utils.txtZeroOneMany(summary[key], "", "{0} failure", "{0} failures");
+        detailsHTML += "<span style='color: red'>";
+        detailsHTML += Utils.txtZeroOneMany(summary[key], "", "{0} failure", "{0} failures");
       }
       if (key !== "0-0") {
         // don't show the retcode for real success
-        detailsTxt += "(" + key.substr(2) + ")";
+        detailsHTML += "(" + key.substr(2) + ")";
       }
-      detailsTxt += "</span>";
+      detailsHTML += "</span>";
     }
 
     detailsSpan.innerText = "";
     detailsSpan.appendChild(Utils.createJobStatusSpan(pJobId));
     const statusSpan = Utils.createSpan();
-    statusSpan.innerHTML = detailsTxt;
+    statusSpan.innerHTML = detailsHTML;
     detailsSpan.appendChild(statusSpan);
     detailsSpan.classList.remove("no-job-details");
     Utils.addToolTip(detailsSpan, "Click to refresh");
@@ -255,8 +262,8 @@ export class JobsDetailsPanel extends JobsPanel {
   addJob (job) {
     const tr = document.createElement("tr");
     tr.id = Utils.getIdFromJobId(job.id);
-    const jobIdText = job.id;
-    tr.appendChild(Utils.createTd(Utils.getIdFromJobId(job.id), jobIdText));
+    tr.dataset.jobid = job.id;
+    tr.appendChild(Utils.createTd("", job.id));
 
     let targetText = TargetType.makeTargetText(job);
     const maxTextLength = 50;
@@ -296,6 +303,7 @@ export class JobsDetailsPanel extends JobsPanel {
 
     this._addJobsMenuItemUpdateStatus(menu, statusSpan);
 
+    tr.dataset.detailsUnknown = "true";
     const detailsTd = Utils.createTd("details");
     const detailsSpan = Utils.createSpan("details2", "(click)");
     detailsSpan.classList.add("no-job-details");
